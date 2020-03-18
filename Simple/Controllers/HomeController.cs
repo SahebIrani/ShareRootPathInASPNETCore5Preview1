@@ -10,6 +10,12 @@ using Simple.Models;
 
 namespace Simple.Controllers
 {
+	static class MyClass
+	{
+		private static void Test() { }
+
+	}
+
 	public class HomeController : Controller
 	{
 		public HomeController(ILogger<HomeController> logger, IWebHostEnvironment webHostEnvironment)
@@ -22,11 +28,55 @@ namespace Simple.Controllers
 		public IWebHostEnvironment WebHostEnvironment { get; }
 
 
-		public IActionResult Index() => View();
+		[HttpGet(nameof(VS16_5_Test))]
+		public string VS16_5_Test()
+		{
+			int i = 13;
+
+			switch (i)
+			{
+				case 0:
+					switch (i)
+					{
+						case 0:
+							return "0";
+					}
+
+					break;
+				case 1:
+					switch (i)
+					{
+						case 1:
+							return "1";
+					}
+
+					break;
+				default:
+					break;
+					//throw i switch
+					//{
+					//	_ => new InvalidOperationException(),
+					//};
+			}
+
+
+			string oldS = $"{4681317222631354044.ToString("N0").PadLeft(4)} .. !!!!";
+			string newS = $"{4681317222631354044,4:N0} .. !!!!";
+
+			double redius = 1.13;
+			double area = AreaMethod(redius);
+			static double AreaMethod(double redius) => 3.14 * redius * redius;
+
+			string result = $"{newS} \n {area}";
+
+			return result;
+		}
+
+		public ViewResult Index() => View();
 
 
 		[HttpGet(nameof(RootPath))]
-		public IActionResult RootPath()
+		public ContentResult RootPath()
 		{
 			string webRootPath = WebHostEnvironment.WebRootPath;
 			string contentRootPath = WebHostEnvironment.ContentRootPath;
@@ -38,13 +88,10 @@ namespace Simple.Controllers
 			return Content(result);
 		}
 
-		public IActionResult Privacy()
-		{
-			return View();
-		}
+		public ViewResult Privacy() => View();
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-		public IActionResult Error()
+		public ViewResult Error()
 		{
 			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 		}
