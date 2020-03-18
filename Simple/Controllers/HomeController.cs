@@ -1,9 +1,14 @@
-﻿using System.Diagnostics;
-
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
+using Simple.Data;
 using Simple.Models;
 using Simple.Services;
 
@@ -18,16 +23,61 @@ namespace Simple.Controllers
 	{
 		public HomeController(
 			ILogger<HomeController> logger,
-			IWebHostEnvironment webHostEnvironment
+			IWebHostEnvironment webHostEnvironment,
+			ApplicationDbContext applicationDbContext
 		)
 		{
 			_logger = logger;
 			WebHostEnvironment = webHostEnvironment;
+			ApplicationDbContext = applicationDbContext;
 		}
 
 		private readonly ILogger<HomeController> _logger;
 		public IWebHostEnvironment WebHostEnvironment { get; }
+		public ApplicationDbContext ApplicationDbContext { get; }
 
+
+		[HttpGet(nameof(EFCore5DemoAsync))]
+		public async ValueTask<OkResult> EFCore5DemoAsync(CancellationToken ct = default)
+		{
+			//? Simple way to get generated SQL
+			IQueryable<Address> query = ApplicationDbContext.Addresses.Where(c => c.City == "Sari");
+			string queryString = query.ToQueryString();
+
+			Console.WriteLine(queryString);
+			_logger.LogInformation(queryString);
+
+			//? Query translations for more DateTime constructs
+			int count = await ApplicationDbContext.Addresses
+				.CountAsync(c => c.CreateDate >= EF.Functions.DateFromParts(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day), ct);
+
+			//? Query translations for more byte array constructs
+			IEnumerable<Customer> blogs =
+				await ApplicationDbContext.Customers.Where(e => e.Picture.Contains((byte)127)).ToListAsync(ct);
+
+			//? Query translation for Reverse
+			IEnumerable<Customer> getReverse =
+				await ApplicationDbContext.Customers.OrderBy(e => e.CustomerId).Reverse().ToListAsync(ct);
+
+			//? Query translation for bitwise operators
+			//? &(bitwise AND)
+			//? | (bitwise OR)
+			//? ~(bitwise NOT)
+			//? ^(bitwise XOR)
+			//? << (bitwise left shift)
+			//? >> (bitwise right shift)
+			//? >>> (bitwise unsigned right shift)
+			//? &= (bitwise AND assignment)
+			//? |= (bitwise OR assignment)
+			//? ^= (bitwise XOR assignment)
+			//? <<= (bitwise left shift and assignment)
+			//? >>= (bitwise right shift and assignment)
+			//? >>>= (bitwise unsigned right shift and assignment)
+			IEnumerable<Customer> getNegated =
+				await ApplicationDbContext.Customers.Where(o => ~o.CustomerId == -2).ToListAsync(ct);
+
+			return Ok();
+		}
 
 		[HttpGet(nameof(VS16_5_Test))]
 		public string VS16_5_Test([FromServices] IPrintService printService)
@@ -75,7 +125,7 @@ namespace Simple.Controllers
 
 			string printServiceResult = printService.Print();
 
-			string result = 
+			string result =
 				$"\n\t GetSwitch: {getSwitch} \n" +
 				$"\t NewS: {newS} \n" +
 				$"\t Area: {area} \n" +

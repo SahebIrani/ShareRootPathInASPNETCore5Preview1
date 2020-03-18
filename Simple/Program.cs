@@ -14,7 +14,17 @@ namespace Simple
 {
 	public class Program
 	{
-		public static Task Main(string[] args) => CreateHostBuilder(args).Build().RunAsync();
+		public static Task Main(string[] args) => CreateHostBuilder2(args).Build().RunAsync();
+
+		//? EF Core uses this method at design time to access the DbContext
+		public static IHostBuilder CreateHostBuilder2(string[] args)
+			=> Host.CreateDefaultBuilder(args)
+				.ConfigureWebHostDefaults(
+					webBuilder =>
+						webBuilder
+							  .UseWebRoot(@"C:\SinjulMSBH\Codes\PathSettings\AltStaticFiles")
+							  .UseStartup<Startup>()
+				);
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
 			Host.CreateDefaultBuilder(args)

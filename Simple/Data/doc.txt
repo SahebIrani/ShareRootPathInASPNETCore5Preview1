@@ -1,0 +1,37 @@
+﻿https://devblogs.microsoft.com/dotnet/announcing-entity-framework-core-5-0-preview-1/
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 5.0.0-preview.2.20120.8
+The EF Core packages published today are:
+Microsoft.EntityFrameworkCore – The main EF Core package
+Microsoft.EntityFrameworkCore.SqlServer – Database provider for Microsoft SQL Server and SQL Azure
+Microsoft.EntityFrameworkCore.Sqlite – Database provider for SQLite
+Microsoft.EntityFrameworkCore.Cosmos – Database provider for Azure Cosmos DB
+Microsoft.EntityFrameworkCore.InMemory – The in-memory database provider
+Microsoft.EntityFrameworkCore.Tools – EF Core PowerShell commands for the Visual Studio Package Manager Console
+Microsoft.EntityFrameworkCore.Design – Shared design-time components for EF Core tools
+Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite – SQL Server support for spatial types
+Microsoft.EntityFrameworkCore.Sqlite.NetTopologySuite – SQLite support for spatial types
+Microsoft.EntityFrameworkCore.Proxies – Lazy-loading and change-tracking proxies
+Microsoft.EntityFrameworkCore.Abstractions – Decoupled EF Core abstractions
+Microsoft.EntityFrameworkCore.Relational – Shared EF Core components for relational database providers
+Microsoft.EntityFrameworkCore.Analyzers – C# analyzers for EF Core
+Microsoft.EntityFrameworkCore.Sqlite.Core – Database provider for SQLite without a packaged native binary
+We have also published the 5.0 preview 1 release of the Microsoft.Data.Sqlite.Core ADO.NET provider.
+
+Installing dotnet ef
+dotnet tool uninstall --global dotnet-ef
+dotnet tool install --global dotnet-ef --version 5.0.0-preview.2.20120.8
+
+
+protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    => optionsBuilder.LogTo(Console.WriteLine);
+
+Set the minimum log level
+Example: .LogTo(Console.WriteLine, LogLevel.Information)
+Filter for only specific events:
+Example: .LogTo(Console.WriteLine, new[] {CoreEventId.ContextInitialized, RelationalEventId.CommandExecuted})
+Filter for all events in specific categories:
+Example: .LogTo(Console.WriteLine, new[] {DbLoggerCategory.Database.Name}, LogLevel.Information)
+Use a custom filter over event and level:
+Example: .LogTo(Console.WriteLine, (id, level) => id == RelationalEventId.CommandExecuting)
+
+
