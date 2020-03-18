@@ -1,24 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+
 using Simple.Models;
+using Simple.Services;
 
 namespace Simple.Controllers
 {
 	static class MyClass
 	{
 		private static void Test() { }
-
 	}
 
 	public class HomeController : Controller
 	{
-		public HomeController(ILogger<HomeController> logger, IWebHostEnvironment webHostEnvironment)
+		public HomeController(
+			ILogger<HomeController> logger,
+			IWebHostEnvironment webHostEnvironment
+		)
 		{
 			_logger = logger;
 			WebHostEnvironment = webHostEnvironment;
@@ -29,36 +30,41 @@ namespace Simple.Controllers
 
 
 		[HttpGet(nameof(VS16_5_Test))]
-		public string VS16_5_Test()
+		public string VS16_5_Test([FromServices] IPrintService printService)
 		{
-			int i = 13;
-
-			switch (i)
+			static string GetSwitch(int i = 13)
 			{
-				case 0:
-					switch (i)
-					{
-						case 0:
-							return "0";
-					}
+				switch (i)
+				{
+					case 0:
+						switch (i)
+						{
+							case 0:
+								return "0";
+						}
 
-					break;
-				case 1:
-					switch (i)
-					{
-						case 1:
-							return "1";
-					}
+						break;
+					case 1:
+						switch (i)
+						{
+							case 1:
+								return "1";
+						}
 
-					break;
-				default:
-					break;
-					//throw i switch
-					//{
-					//	_ => new InvalidOperationException(),
-					//};
+						break;
+					default:
+						return "Default";
+						//break;
+						//throw i switch
+						//{
+						//	_ => new InvalidOperationException(),
+						//};
+				}
+
+				return default;
 			}
 
+			string getSwitch = GetSwitch(1);
 
 			string oldS = $"{4681317222631354044.ToString("N0").PadLeft(4)} .. !!!!";
 			string newS = $"{4681317222631354044,4:N0} .. !!!!";
@@ -67,7 +73,14 @@ namespace Simple.Controllers
 			double area = AreaMethod(redius);
 			static double AreaMethod(double redius) => 3.14 * redius * redius;
 
-			string result = $"{newS} \n {area}";
+			string printServiceResult = printService.Print();
+
+			string result = 
+				$"\n\t GetSwitch: {getSwitch} \n" +
+				$"\t NewS: {newS} \n" +
+				$"\t Area: {area} \n" +
+				$"\t PrintService: {printServiceResult}"
+			;
 
 			return result;
 		}
