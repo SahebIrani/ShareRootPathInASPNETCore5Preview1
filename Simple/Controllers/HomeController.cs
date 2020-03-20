@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -36,6 +37,49 @@ namespace Simple.Controllers
 		public IWebHostEnvironment WebHostEnvironment { get; }
 		public ApplicationDbContext ApplicationDbContext { get; }
 
+
+		[HttpGet(nameof(EFCore5CreateDbCommandQueryStringAsync))]
+		public async ValueTask<OkResult> EFCore5CreateDbCommandQueryStringAsync(CancellationToken ct = default)
+		{
+			//? Simple way to get generated SQL
+			const string city = "Sari";
+			IQueryable<Address> query = ApplicationDbContext.Addresses.Where(c => c.City == city);
+			string queryString = query.ToQueryString();
+
+			Console.WriteLine(queryString);
+			_logger.LogInformation(queryString);
+
+			//? This will work in simple cases, but the translation to a query string and back to a command loses some information. For example,
+			//? if a transaction is being used then the code above would need to find that transaction and associate itself.
+			DbConnection connection = ApplicationDbContext.Database.GetDbConnection();
+			using (DbCommand command = connection.CreateCommand())
+			{
+				command.CommandText = query.ToQueryString();
+
+				await connection.OpenAsync(ct);
+
+				using (DbDataReader results = await command.ExecuteReaderAsync(ct))
+				{
+				}
+
+				await connection.CloseAsync();
+			}
+
+			//? Instead, EF Core 5.0 introduces CreateDbCommand which creates and configures a DbCommand just as EF does to execute the query. For example:
+			DbConnection connection2 = ApplicationDbContext.Database.GetDbConnection();
+			using (DbCommand command = query.CreateDbCommand())
+			{
+				await connection2.OpenAsync(ct);
+
+				using (DbDataReader results = command.ExecuteReader())
+				{
+				}
+
+				await connection2.CloseAsync();
+			}
+
+			return Ok();
+		}
 
 		[HttpGet(nameof(EFCore5DemoAsync))]
 		public async ValueTask<OkResult> EFCore5DemoAsync(CancellationToken ct = default)
