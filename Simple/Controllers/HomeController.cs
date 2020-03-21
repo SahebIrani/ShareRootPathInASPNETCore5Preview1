@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -36,6 +39,78 @@ namespace Simple.Controllers
 		private readonly ILogger<HomeController> _logger;
 		public IWebHostEnvironment WebHostEnvironment { get; }
 		public ApplicationDbContext ApplicationDbContext { get; }
+
+		[HttpGet(nameof(HTTPPROTOCOL))]
+		public ContentResult HTTPPROTOCOL()
+		{
+			//? using Microsoft.AspNetCore.Http;
+
+			//? "HTTP/1.0"
+			//? "HTTP/1.1"
+			//? "HTTP/2"
+			//? "HTTP/3"
+
+			ProtocolType iPv6 = ProtocolType.IPv6;
+			ProtocolType iP = ProtocolType.IP;
+			ProtocolType tcp = ProtocolType.Tcp;
+			ProtocolType udp = ProtocolType.Udp;
+
+			Uri address8 = new Uri("https://example.contoso.com");
+			if (address8.Scheme == Uri.UriSchemeHttps)
+				Console.WriteLine("Uri is Https protocol ..");
+
+			Version unknown = HttpVersion.Unknown;
+			Version version10 = HttpVersion.Version10;
+			Version version11 = HttpVersion.Version11;
+			Version version20 = HttpVersion.Version20;
+			Version version30 = HttpVersion.Version30;
+			
+			string protocol10 = HttpProtocol.Http10; 
+			string protocol11 = HttpProtocol.Http11; 
+			string protocol20 = HttpProtocol.Http2;  
+			string protocol30 = HttpProtocol.Http3;
+
+			string protocol = Request.Protocol;
+			string version30Protocol = HttpProtocol.GetHttpProtocol(version30);
+			string finalProtocol = 
+				HttpProtocol.GetHttpProtocol(
+					new Version(major: 2, minor: 0, build: 1, revision: 1) 
+				);
+
+			bool isHttp10 = HttpProtocol.IsHttp10(protocol: protocol);
+			bool isHttp11 = HttpProtocol.IsHttp11(protocol: protocol);
+			bool isHttp2 = HttpProtocol.IsHttp2(protocol: protocol);
+			bool isHttp3 = HttpProtocol.IsHttp3(protocol: protocol);
+
+			bool isHttp2Protocol = IsHttp2(protocol: protocol20);
+
+			static bool IsHttp2(string protocol) =>
+				ReferenceEquals(objA: HttpProtocol.Http2, objB: protocol) || 
+				StringComparer.OrdinalIgnoreCase.Equals(x: HttpProtocol.Http2, y: protocol)
+			;
+
+			string result =
+				$"\n\t" +
+				$"version10: {version10}\n\t" +
+				$"version11: {version11}\n\t" +
+				$"version20: {version20}\n\t" +
+				$"version30: {version30}\n\t" +
+				$"protocol10: {protocol10}\n\t" +
+				$"protocol11: {protocol11}\n\t" +
+				$"protocol20: {protocol20}\n\t" +
+				$"protocol30: {protocol30}\n\t" +
+				$"protocol: {protocol}\n\t" +
+				$"version30Protocol: {version30Protocol}\n\t" +
+				$"finalProtocol: {finalProtocol}\n\t" +
+				$"isHttp10: {isHttp10}\n\t" +
+				$"isHttp11: {isHttp11}\n\t" +
+				$"isHttp2: {isHttp2}\n\t" +
+				$"isHttp3: {isHttp3}\n\t" +
+				$"isHttp2Protocol: {isHttp2Protocol}\n\t" 
+			;
+
+			return Content(result);
+		}
 
 
 		[HttpGet(nameof(EFCore5CreateDbCommandQueryStringAsync))]
